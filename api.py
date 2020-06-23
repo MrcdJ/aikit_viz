@@ -1,10 +1,9 @@
 from flask import Flask
-from flask_restplus import Api, Resource, fields
-from werkzeug.contrib.fixers import ProxyFix
-from modelDAO import FactoryDAO
+from flask_restplus import Api, Resource
+from utils import utils
+
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(
     app, version='1.0', title='Aikit API',
     description='A first version of aikit API',
@@ -13,8 +12,7 @@ api = Api(
 ns = api.namespace('aikit_api', description='Aikit API operations')
 
 
-# todo: swagger
-#  result = api.model('Result', FactoryDAO().swagger_ResultDAO())
+response = api.model('response', utils.swagger_Result())
 
 # todo: swagger
 #  config = api.model('Config', FactoryDAO().swagger_ConfigDAO())
@@ -22,12 +20,13 @@ ns = api.namespace('aikit_api', description='Aikit API operations')
 
 @ns.route('/')
 class Home(Resource):
-    """Home for aikit framework"""
+    """ Home for aikit framework"""
     @ns.doc('home')
+    @api.marshal_with(response)
     def get(self):
-        """List all aikit options"""  # todo: for now, just display existing result file
+        """ List all aikit options """  # todo: for now, just display existing aikit result in json format
         file = "./result.xlsx"
-        return FactoryDAO.FactoryDAO().xl_to_ResultDAO(file).to_json()
+        return {'result': utils.xl_to_Result(file)}
 
 #     @ns.doc('aikit config and run')
 #     #@ns.expect(config)
