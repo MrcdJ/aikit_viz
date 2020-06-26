@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restplus import Api, Resource
-from utils import utils
+from aikit.ml_machine import AutoMlResultReader, FolderDataPersister, read_results, read_results_and_errors
 
 
 app = Flask(__name__)
@@ -12,42 +12,33 @@ api = Api(
 ns = api.namespace('aikit_api', description='Aikit API operations')
 
 
-response = api.model('response', utils.swagger_Result())
-
-# todo: swagger
-#  config = api.model('Config', FactoryDAO().swagger_ConfigDAO())
-
-
 @ns.route('/')
 class Home(Resource):
-    """ Home for aikit framework"""
+    """ Home for aikit framework """
     @ns.doc('home')
-    @api.marshal_with(response)
     def get(self):
-        """ List all aikit options """  # todo: for now, just display existing aikit result in json format
-        file = "./result.xlsx"
-        return {'result': utils.xl_to_Result(file)}
+        """ displays existing aikit results in json format.
+            We guess we already have the directory 'titanic', where results files of automl run command are stored.
+        """
+        result_reader = AutoMlResultReader(FolderDataPersister(base_folder="./titanic/"))
+        data_frame = read_results(result_reader)
+        return data_frame.to_json()
 
-#     @ns.doc('aikit config and run')
-#     #@ns.expect(config)
-#     #@ns.marshal_with(config, code=201)
-#     def post(self):
-#         """Define parameters for aikit configuration and launch the research"""
-#         # todo: working on it
-#         # return Client_Session.to_json()
-#
-#
-# # TODO: give id to client and save aikit run in id path
-# @ns.route('/<int:id>')
-# @ns.response(404, 'Id not found')
-# @ns.param('id', 'The client path identifier')
-# class Result(Resource):
-#     """Shows a list of client own aikit results"""
-#     @ns.doc('list_results')
-#     @ns.marshal_list_with(result)
-#     def get(self):
-#         """List all results"""
-#         # todo: get what is done is route('/')
+
+@ns.route('/errors/')
+class Home(Resource):
+    """ If we want errors of aikit automl launcher """
+    @ns.doc('errors')
+    def get(self):
+        """ displays existing aikit results and errors in json format.
+            We guess we already have the directory 'titanic', where results files are stored.
+        """
+        result_reader = AutoMlResultReader(FolderDataPersister(base_folder="./titanic/"))
+        data_frame_results, data_frame_errors = read_results_and_errors(result_reader)
+        return {
+            'results': data_frame_results.to_json(),
+            'errors': data_frame_errors.to_json()
+        }
 
 
 if __name__ == '__main__':
