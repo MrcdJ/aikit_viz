@@ -22,7 +22,7 @@ class Home(Resource):
         """
         result_reader = AutoMlResultReader(FolderDataPersister(base_folder="./titanic/"))
         data_frame = read_results(result_reader)
-        return data_frame.to_json()
+        return data_frame.to_json(orient='records')
 
 
 @ns.route('/errors/')
@@ -36,11 +36,11 @@ class Home(Resource):
         result_reader = AutoMlResultReader(FolderDataPersister(base_folder="./titanic/"))
         data_frame_results, data_frame_errors = read_results_and_errors(result_reader)
         return {
-            'results': data_frame_results.to_json(),
-            'errors': data_frame_errors.to_json()
+            'results': data_frame_results.to_json(orient='records'),
+            'errors': data_frame_errors.to_json(orient='records')
         }
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
 
