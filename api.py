@@ -20,7 +20,7 @@ class Home(Resource):
         """ displays existing aikit results in json format.
             We guess we already have the directory 'titanic', where results files of automl run command are stored.
         """
-        result_reader = AutoMlResultReader(FolderDataPersister(base_folder="./titanic/"))
+        result_reader = AutoMlResultReader(FolderDataPersister(base_folder="~/automl/titanic/"))
         data_frame = read_results(result_reader)
         return data_frame.to_json(orient='records')
 
